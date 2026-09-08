@@ -1,34 +1,24 @@
 package com.soeil.movielist.ui.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -43,22 +33,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
-import com.soeil.movielist.core.network.model.Movie
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieListScreen(
+    onMovieClick: (String) -> Unit,
+    onFavoritesClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MovieListViewModel = viewModel(),
 ) {
@@ -131,8 +119,8 @@ fun MovieListScreen(
                         IconButton(onClick = { searchActive = true }) {
                             Icon(Icons.Default.Search, contentDescription = "Search")
                         }
-                        IconButton(onClick = { /* like */ }) {
-                            Icon(Icons.Default.Favorite, contentDescription = "Like")
+                        IconButton(onClick = onFavoritesClick) {
+                            Icon(Icons.Default.Favorite, contentDescription = "Liked movies")
                         }
                     }
                 }
@@ -164,7 +152,12 @@ fun MovieListScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     items(uiState.movies, key = { it.imdbID }) { movie ->
-                        MovieRow(movie)
+                        MovieCardRow(
+                            title = movie.Title,
+                            year = movie.Year,
+                            poster = movie.Poster,
+                            onClick = { onMovieClick(movie.imdbID) },
+                        )
                     }
                     if (uiState.isLoading) {
                         item(key = "footer") {
@@ -179,40 +172,6 @@ fun MovieListScreen(
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun MovieRow(movie: Movie) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Row(modifier = Modifier.padding(12.dp)) {
-            Box(
-                modifier = Modifier
-                    .size(width = 80.dp, height = 112.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                AsyncImage(
-                    model = movie.Poster,
-                    contentDescription = movie.Title,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.padding(top = 4.dp)) {
-                Text(
-                    text = movie.Title,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = movie.Year,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
             }
         }
     }

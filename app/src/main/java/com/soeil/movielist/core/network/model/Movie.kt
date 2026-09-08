@@ -15,3 +15,23 @@ data class Movie(
     val Type: String,
     val Poster: String,
 )
+
+// OMDB detail response: ?i=<imdbId> — all optional, API sends "N/A" for missing.
+data class MovieDetail(
+    val Title: String? = null,
+    val Year: String? = null,
+    val imdbID: String? = null,
+    val Poster: String? = null,
+    val Released: String? = null,
+    val Runtime: String? = null,
+    val Genre: String? = null,
+    val Director: String? = null,
+    val Writer: String? = null,
+    val Actors: String? = null,
+    val Plot: String? = null,
+    val Language: String? = null,
+    val Country: String? = null,
+    val Awards: String? = null,
+    val Response: String? = null,
+    val Error: String? = null,
+)
