@@ -35,3 +35,34 @@ jobs:
       with:
         name: app-debug
         path: app/build/outputs/apk/debug/*.apk
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Decode Keystore
+      env:
+        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      run: |
+        echo "$KEYSTORE_BASE64" | base64 --decode > android_keystore.jks
+
+    - name: Build and Sign Release APK
+      env:
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: |
+        ./gradlew assembleRelease \
+          -Pandroid.injected.signing.store.file=$(pwd)/android_keystore.jks \
+          -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
+          -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
+          -Pandroid.injected.signing.key.password=$KEY_PASSWORD
+
+    - name: Clean up Keystore
+      if: always()
+      run: rm -f android_keystore.jks
+
+    - name: Upload Signed Release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release-signed
+        path: app/build/outputs/apk/release/*.apk
